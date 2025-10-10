@@ -1,0 +1,21 @@
+using UnityEngine;
+
+public class Feeder : Interactable
+{
+    [SerializeField] private float hungerGainPerSecond = 30f;
+
+    private void Reset()
+    {
+        primaryNeed = NeedType.Hunger;
+        interactionDuration = 3f;
+        capacity = 1;
+    }
+
+    public override void OnStartUse(GameObject user) { }
+    public override void OnUseTick(GameObject user, float dt)
+    {
+        if (user.TryGetComponent<HamsterNeeds>(out var needs))
+            needs.ModifyNeed(NeedType.Hunger, +hungerGainPerSecond * dt);
+    }
+    public override void OnCompleteUse(GameObject user) { }
+}
