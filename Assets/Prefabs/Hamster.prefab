@@ -12,6 +12,8 @@ GameObject:
   - component: {fileID: 4566062798335279167}
   - component: {fileID: 8257028161783125951}
   - component: {fileID: 4879754328730487173}
+  - component: {fileID: -3123374044230959575}
+  - component: {fileID: 7296625712740711473}
   m_Layer: 0
   m_Name: Hamster
   m_TagString: Untagged
@@ -155,3 +157,41 @@ CircleCollider2D:
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
   m_Radius: 0.1
+--- !u!114 &-3123374044230959575
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9070423456406591134}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e29c9a2b5bbe70a4fa2de79cb9c8ca73, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HamsterNeeds
+  hunger: 70
+  thirst: 70
+  energy: 70
+  fun: 50
+  comfort: 60
+  hungerDecay: 10
+  thirstDecay: 12
+  energyDecay: 6
+  funDecay: 8
+  comfortDecay: 4
+--- !u!114 &7296625712740711473
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9070423456406591134}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bda8292f05d90a845b88dec31582bb47, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HamsterBrain2D
+  moveSpeed: 1.5
+  decisionInterval: 1
+  interactionTime: 2
+  arrivalRadius: 0.12

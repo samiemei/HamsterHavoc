@@ -1,98 +1,176 @@
+using System.Collections.Generic;
 using UnityEngine;
-using System.Collections;
 
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(HamsterNeeds))]
-public class HamsterBrain2D : MonoBehaviour
+public class HamsterBrain : MonoBehaviour
 {
     private enum State { Idle, Moving, Interacting }
 
     [Header("Movement")]
-    public float moveSpeed = 1.5f;
-    public float decisionInterval = 1f;
-    public float interactionTime = 2f;
+    public float moveSpeed = 1.6f;
+    public float decisionInterval = 0.4f;
+    public float interactionTime = 2.5f;
+    public float arrivalRadius = 0.25f;
+
+    
+    public float triggerThreshold = 35f;
+    
+    public float desperateThreshold = 15f;
+
+    //stop interacting after this
+    public float satisfactionTarget = 80f;
+    
+    public float perNeedCooldown = 4f;
 
     private Rigidbody2D rb;
     private HamsterNeeds needs;
     private Interactable target;
+    private NeedType currentNeed = NeedType.None; 
     private Vector2 destination;
     private State state = State.Idle;
+    private float decideTimer;
     private float interactTimer;
+
+    
+    private readonly Dictionary<NeedType, float> cooldownUntil = new();
 
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
         needs = GetComponent<HamsterNeeds>();
+        rb.gravityScale = 0f;
+        rb.interpolation = RigidbodyInterpolation2D.Interpolate;
+        rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+        rb.freezeRotation = true;
+        
+        cooldownUntil[NeedType.Hunger] = 0f;
+        cooldownUntil[NeedType.Thirst] = 0f;
+        cooldownUntil[NeedType.Energy] = 0f;
+        cooldownUntil[NeedType.Fun] = 0f;
+        cooldownUntil[NeedType.Comfort] = 0f;
     }
 
-    void OnEnable() => StartCoroutine(BrainLoop());
-
-    IEnumerator BrainLoop()
+    void Update()
     {
-        var wait = new WaitForSeconds(decisionInterval);
-        while (enabled)
+        decideTimer -= Time.deltaTime;
+        if (decideTimer <= 0f && state != State.Interacting)
         {
-            switch (state)
-            {
-                case State.Idle:
-                    DecideNext();
-                    break;
-
-                case State.Moving:
-                    MoveTowardDestination();
-                    break;
-
-                case State.Interacting:
-                    interactTimer -= Time.deltaTime;
-                    if (target)
-                        target.OnUseTick(gameObject, Time.deltaTime);
-                    if (interactTimer <= 0)
-                    {
-                        if (target) target.OnCompleteUse(gameObject);
-                        target = null;
-                        state = State.Idle;
-                    }
-                    break;
-            }
-            yield return wait;
+            DecideNext();
+            decideTimer = decisionInterval;
         }
+
+        switch (state)
+        {
+            case State.Moving: MoveTowardDestination(); break;
+
+            case State.Interacting:
+                rb.linearVelocity = Vector2.zero;
+                interactTimer -= Time.deltaTime;
+
+                if (target) target.OnUseTick(gameObject, Time.deltaTime);
+
+                // stop early if hits satisfaction target
+                if (currentNeed != NeedType.None &&
+                    needs.GetValue(currentNeed) >= satisfactionTarget)
+                {
+                    FinishInteraction();
+                    break;
+                }
+
+                if (interactTimer <= 0f)
+                {
+                    FinishInteraction();
+                }
+                break;
+
+            case State.Idle:
+                rb.linearVelocity = Vector2.zero;
+                break;
+        }
+    }
+
+    void FinishInteraction()
+    {
+        if (target) target.OnCompleteUse(gameObject);
+        
+        if (currentNeed != NeedType.None)
+            cooldownUntil[currentNeed] = Time.time + perNeedCooldown;
+
+        target = null;
+        currentNeed = NeedType.None;
+        state = State.Idle;
     }
 
     void DecideNext()
     {
-        var need = needs.GetLowestNeed();
-        target = InteractableRegistry.Instance?.FindNearest(transform.position, need, 10f);
+        NeedType lowest = needs.GetLowestNeed();
+        float v = needs.GetValue(lowest);
+        
+        bool isDesperate = v <= desperateThreshold;
+        bool isTriggered = v <= triggerThreshold;
+        bool cooledDown = Time.time >= (cooldownUntil.TryGetValue(lowest, out var until) ? until : 0f);
 
-        if (target)
+        if (!(isDesperate || (isTriggered && cooledDown)))
         {
-            destination = target.GetUsePosition();
+            destination = (Vector2)transform.position + Random.insideUnitCircle * 2.0f;
+            state = State.Moving;
+            currentNeed = NeedType.None;
+            target = null;
+            return;
+        }
+        
+        var best = InteractableRegistry.Instance
+            ? InteractableRegistry.Instance.FindNearest((Vector2)transform.position, lowest, 50f)
+            : null;
+
+        if (best != null)
+        {
+            target = best;
+            currentNeed = lowest;
+            destination = best.GetUsePosition();
             state = State.Moving;
         }
         else
         {
-            // wander randomly
-            destination = (Vector2)transform.position + Random.insideUnitCircle * 2f;
+            destination = (Vector2)transform.position + Random.insideUnitCircle * 2.0f;
             state = State.Moving;
+            currentNeed = NeedType.None;
         }
+        
+        if (target == null)
+            Debug.Log($"[Brain] No target for need {needs.GetLowestNeed()} (registry {(InteractableRegistry.Instance ? "OK" : "NULL")})");
+        else
+            Debug.Log($"[Brain] Going to {target.name} for {target.PrimaryNeed}");
     }
 
     void MoveTowardDestination()
     {
-        Vector2 dir = (destination - (Vector2)transform.position);
-        if (dir.magnitude < 0.1f)
+        Vector2 pos = transform.position;
+        Vector2 to = destination - pos;
+        float dist = to.magnitude;
+
+        if (dist <= arrivalRadius)
         {
-            rb.velocity = Vector2.zero;
-            if (target)
+            rb.linearVelocity = Vector2.zero;
+
+            if (target != null)
             {
                 interactTimer = interactionTime;
                 target.OnStartUse(gameObject);
                 state = State.Interacting;
             }
-            else state = State.Idle;
+            else
+            {
+                state = State.Idle;
+            }
+            return;
         }
-        else
-        {
-            rb.velocity = dir.normalized * moveSpeed;
-        }
+
+        // movement smoothing
+        float slowRadius = arrivalRadius * 3f;
+        float speed = dist < slowRadius ? Mathf.Lerp(0f, moveSpeed, dist / slowRadius) : moveSpeed;
+        Vector2 next = Vector2.MoveTowards(pos, destination, speed * Time.deltaTime);
+        rb.MovePosition(next);
     }
 }

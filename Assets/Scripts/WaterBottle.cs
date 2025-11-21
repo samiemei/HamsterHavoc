@@ -8,7 +8,6 @@ public class WaterBottle : Interactable
     {
         primaryNeed = NeedType.Thirst;
         interactionDuration = 3f;
-        capacity = 1;
     }
 
     public override void OnUseTick(GameObject user, float dt)

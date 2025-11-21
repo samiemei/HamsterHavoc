@@ -9,7 +9,6 @@ public class Nest : Interactable
     {
         primaryNeed = NeedType.Energy;
         interactionDuration = 5f;
-        capacity = 2; // multiple can cuddle :)
     }
 
     public override void OnUseTick(GameObject user, float dt)

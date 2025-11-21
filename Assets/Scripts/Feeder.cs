@@ -8,7 +8,6 @@ public class Feeder : Interactable
     {
         primaryNeed = NeedType.Hunger;
         interactionDuration = 3f;
-        capacity = 1;
     }
 
     public override void OnStartUse(GameObject user) { }

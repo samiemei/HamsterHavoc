@@ -10,7 +10,6 @@ public class Wheel : Interactable
     {
         primaryNeed = NeedType.Fun;
         interactionDuration = 4f;
-        capacity = 1;
     }
 
     public override Vector2 GetUsePosition()

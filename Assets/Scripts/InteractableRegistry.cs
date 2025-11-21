@@ -4,34 +4,35 @@ using UnityEngine;
 public class InteractableRegistry : MonoBehaviour
 {
     public static InteractableRegistry Instance { get; private set; }
-    private List<Interactable> all = new();
+
+    private readonly List<Interactable> all = new();
 
     void Awake()
     {
-        if (Instance != null && Instance != this) Destroy(gameObject);
-        else Instance = this;
+        if (Instance && Instance != this) { Destroy(gameObject); return; }
+        Instance = this;
     }
 
-    public void Register(Interactable i)
+    public void Register(Interactable i) { if (i && !all.Contains(i)) all.Add(i); }
+    public void Unregister(Interactable i) { if (i) all.Remove(i); }
+
+    void Start()
     {
-        if (!all.Contains(i)) all.Add(i);
+        // optional sweep so you don't need a separate AutoRegister component
+        var all = FindObjectsByType<Interactable>(FindObjectsSortMode.None);
+        foreach (var i in all) Register(i);
     }
-
-    public void Unregister(Interactable i) => all.Remove(i);
 
     public Interactable FindNearest(Vector2 from, NeedType need, float maxRange)
     {
         Interactable best = null;
         float bestDist = Mathf.Infinity;
+
         foreach (var i in all)
         {
-            if (i == null || i.PrimaryNeed != need) continue;
-            float d = Vector2.Distance(from, i.transform.position);
-            if (d < bestDist && d <= maxRange)
-            {
-                best = i;
-                bestDist = d;
-            }
+            if (!i || i.PrimaryNeed != need) continue;
+            float d = Vector2.Distance(from, i.GetUsePosition());
+            if (d < bestDist && d <= maxRange) { bestDist = d; best = i; }
         }
         return best;
     }
