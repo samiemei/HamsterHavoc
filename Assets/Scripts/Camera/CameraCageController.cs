@@ -6,7 +6,7 @@ public class CameraCageController : MonoBehaviour
     public static CameraCageController Instance { get; private set; }
 
     [Header("Follow Settings")]
-    public float moveSpeed = 4f;   // how fast camera lerps to new cage
+    public float moveSpeed = 4f; 
     public float snapDistance = 0.02f;
 
     private readonly List<CageArea> cages = new();
@@ -36,23 +36,20 @@ public class CameraCageController : MonoBehaviour
         Vector3 currentPos = transform.position;
         Vector3 targetPos = new Vector3(target.position.x, target.position.y, defaultZ);
 
-        // Smooth lerp
+        // smoothing
         Vector3 nextPos = Vector3.Lerp(currentPos, targetPos, moveSpeed * Time.deltaTime);
-
-        // Optional: snap when close enough
+        
         if ((targetPos - nextPos).sqrMagnitude < snapDistance * snapDistance)
             nextPos = targetPos;
 
         transform.position = nextPos;
     }
-
-    // Called when a new cage gets created
+    
     public void RegisterCage(CageArea cage)
     {
         if (!cage) return;
         cages.Add(cage);
-
-        // If first cage, focus immediately
+        
         if (currentIndex == -1)
         {
             currentIndex = 0;
@@ -66,14 +63,13 @@ public class CameraCageController : MonoBehaviour
     {
         if (index < 0 || index >= cages.Count) return;
         currentIndex = index;
-        // no snap here, Update will lerp
     }
 
     public void NextCage()
     {
         if (cages.Count == 0) return;
         currentIndex = (currentIndex + 1) % cages.Count;
-        SetHUDTargetForCurrent(); // HUD switches too
+        SetHUDTargetForCurrent();
     }
 
     public void PreviousCage()

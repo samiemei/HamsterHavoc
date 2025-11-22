@@ -106,15 +106,13 @@ public class HamsterBrain : MonoBehaviour
 
     void DecideNext()
     {
-        // 1) Figure out which need we care about right now
         NeedType lowest = needs.GetLowestNeed();
         float v = needs.GetValue(lowest);
 
         bool isDesperate = v <= desperateThreshold;
         bool isTriggered = v <= triggerThreshold;
         bool cooledDown = Time.time >= (cooldownUntil.TryGetValue(lowest, out var until) ? until : 0f);
-
-        // 2) If nothing is urgent enough, just wander in this cage
+        
         if (!(isDesperate || (isTriggered && cooledDown)))
         {
             destination = (Vector2)transform.position + Random.insideUnitCircle * 2.0f;
@@ -124,7 +122,6 @@ public class HamsterBrain : MonoBehaviour
             return;
         }
 
-        // 3) Ask the registry for the best target IN THIS CAGE
         Interactable best = null;
         if (InteractableRegistry.Instance != null)
         {
@@ -132,11 +129,10 @@ public class HamsterBrain : MonoBehaviour
                 (Vector2)transform.position,
                 lowest,
                 50f,
-                cageId              // 🔑 only look at interactables in my cage
+                cageId 
             );
         }
-
-        // 4) If we found something, go there. Otherwise, wander.
+        
         if (best != null)
         {
             target = best;
@@ -151,8 +147,7 @@ public class HamsterBrain : MonoBehaviour
             currentNeed = NeedType.None;
             target = null;
         }
-
-        // 5) Debug logging
+        
         if (target == null)
             Debug.Log($"[Brain] No target for need {lowest} in cage {cageId} " +
                       $"(registry {(InteractableRegistry.Instance ? "OK" : "NULL")})");

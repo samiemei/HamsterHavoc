@@ -145,8 +145,8 @@ MonoBehaviour:
   comfortPenaltyPerSecond: 6
   normalLifeSeconds: 8
   bonusLifeSeconds: 3
-  normalXpReward: 50
-  bonusXpReward: 100
+  normalXpReward: 5
+  bonusXpReward: 30
   cleanFX: {fileID: 0}
   cleanSfx: {fileID: 0}
   normalSprite: {fileID: 21300000, guid: dd5b4170f2796944dad684b31d0ea9cc, type: 3}

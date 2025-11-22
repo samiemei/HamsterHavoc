@@ -4,29 +4,25 @@ using UnityEngine;
 public class Poop : MonoBehaviour
 {
     [Header("General")]
-    public bool isBonus = false;          // set by spawner
+    public bool isBonus = false;
     public float stinkRadius = 1.2f;
     public float comfortPenaltyPerSecond = 4f;
 
     [Header("Lifetime")]
-    [Tooltip("How long a normal poop stays before despawning.")]
-    public float normalLifeSeconds = 8f;  // faster than before
+    public float normalLifeSeconds = 8f;
+    public float bonusLifeSeconds = 3f;
 
-    [Tooltip("How long a bonus poop stays before despawning.")]
-    public float bonusLifeSeconds = 3f;   // VERY quick
-
-    [Header("XP Rewards")]
-    public int normalXpReward = 5;
-    public int bonusXpReward = 20;
+    [Header("XP / Currency Rewards")]
+    public int normalXpReward = 0; 
+    public int bonusXpReward = 0;
 
     [Header("FX (optional)")]
     public ParticleSystem cleanFX;
     public AudioSource cleanSfx;
     public Sprite normalSprite;
-    public Sprite bonusSprite;           // optional shiny sprite
+    public Sprite bonusSprite;
 
     float lifeSeconds;
-    int xpReward;
     float t;
 
     void Awake()
@@ -34,35 +30,27 @@ public class Poop : MonoBehaviour
         var col = GetComponent<Collider2D>();
         col.isTrigger = true;
 
-        // default to normal config if not set by spawner
         ApplyBonusState(isBonus);
     }
 
     void Update()
     {
-        // stink effect
-        var hits = Physics2D.OverlapCircleAll(transform.position, stinkRadius);
-        foreach (var h in hits)
-        {
-            if (h.TryGetComponent<HamsterNeeds>(out var needs))
-            {
-                needs.ModifyNeed(NeedType.Comfort, -comfortPenaltyPerSecond * Time.deltaTime);
-            }
-        }
-
-        // lifetime countdown
         t += Time.deltaTime;
         if (t >= lifeSeconds)
-            Clean();   // auto-despawn (no XP if player missed it)
+        {
+            Expire();
+        }
     }
-
-    public void Clean()
+    
+    public void Collect()
     {
-        // notify XP + poop counter
         if (GameXPManager.Instance != null)
         {
-            GameXPManager.Instance.AddXP(xpReward);
             GameXPManager.Instance.RegisterPoopCollected(isBonus);
+            
+            int xpReward = isBonus ? bonusXpReward : normalXpReward;
+            if (xpReward > 0)
+                GameXPManager.Instance.AddXP(xpReward);
         }
 
         if (cleanFX) Instantiate(cleanFX, transform.position, Quaternion.identity);
@@ -70,14 +58,16 @@ public class Poop : MonoBehaviour
 
         Destroy(gameObject);
     }
+    
+    void Expire()
+    {
+        Destroy(gameObject);
+    }
 
-    /// <summary> Called by the spawner to turn this into bonus or normal poop. </summary>
     public void ApplyBonusState(bool bonus)
     {
         isBonus = bonus;
-
         lifeSeconds = isBonus ? bonusLifeSeconds : normalLifeSeconds;
-        xpReward   = isBonus ? bonusXpReward   : normalXpReward;
 
         var sr = GetComponent<SpriteRenderer>();
         if (sr)

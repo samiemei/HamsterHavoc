@@ -26,27 +26,31 @@ public class GameXPManager : MonoBehaviour
     public int totalPoopsCollected { get; private set; }
     public int totalBonusPoopsCollected { get; private set; }
     public System.Action<int,int> OnPoopCollected;
+    
+    public int poopCurrency { get; private set; }
+
+    public System.Action<int> OnPoopCurrencyChanged;
 
 
     public int startingCagesUnlocked = 1;
 
     private int cagesUnlocked = 0;
     
-
-    // Events you can hook UI into if you want later
-    public event Action<int> OnLevelChanged;           // new level
-    public event Action<int, int> OnXPChanged;         // currentXP, xpToNext
-    public event Action<int> OnCageUnlocked;           // index of new cage
+    
+    public event Action<int> OnLevelChanged;   
+    public event Action<int, int> OnXPChanged;      
+    public event Action<int> OnCageUnlocked;   
 
     void Awake()
     {
+        
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
             return;
         }
         Instance = this;
-        DontDestroyOnLoad(gameObject);  // optional; remove if you don't want persistence
+        DontDestroyOnLoad(gameObject); 
 
         CurrentLevel = startingLevel;
         CurrentXP = 0;
@@ -64,18 +68,37 @@ public class GameXPManager : MonoBehaviour
         InitExistingCages(); 
     }
     
+    public void AddPoopCurrency(int amount)
+    {
+        if (amount <= 0) return;
+        poopCurrency += amount;
+        OnPoopCurrencyChanged?.Invoke(poopCurrency);
+    }
+    
+    
+    public bool TrySpendPoopCurrency(int cost)
+    {
+        if (cost <= 0) return true;
+        if (poopCurrency < cost) return false;
+
+        poopCurrency -= cost;
+        OnPoopCurrencyChanged?.Invoke(poopCurrency);
+        return true;
+    }
+    
     public void RegisterPoopCollected(bool bonus)
     {
         totalPoopsCollected++;
         if (bonus) totalBonusPoopsCollected++;
 
+        // 1 = 1 rn
+        poopCurrency++;
+        
+        OnPoopCurrencyChanged?.Invoke(poopCurrency);
         OnPoopCollected?.Invoke(totalPoopsCollected, totalBonusPoopsCollected);
 
-        // Debug so you can see it working:
-        Debug.Log($"[XP] Poops collected: {totalPoopsCollected} (bonus: {totalBonusPoopsCollected})");
+        Debug.Log($"[XP] Poops collected: {totalPoopsCollected} (bonus: {totalBonusPoopsCollected}), currency: {poopCurrency}");
     }
-
-    // --- Public API ---------------------------------------------------------
 
     public void AddXP(int amount)
     {
@@ -83,14 +106,12 @@ public class GameXPManager : MonoBehaviour
 
         CurrentXP += amount;
         NotifyXPChanged();
-
-        // Handle multiple level-ups in case of big XP bursts
+        
         while (CurrentXP >= XPToNextLevel)
         {
             CurrentXP -= XPToNextLevel;
             LevelUp();
         }
-
         NotifyXPChanged();
     }
     
@@ -102,7 +123,6 @@ public class GameXPManager : MonoBehaviour
         NotifyXPChanged();
         OnLevelChanged?.Invoke(CurrentLevel);
     }
-    
 
     void LevelUp()
     {
@@ -125,22 +145,19 @@ public class GameXPManager : MonoBehaviour
             FindObjectsInactive.Exclude,
             FindObjectsSortMode.None
         );
-
-
-        // Optional: sort them so IDs are in a predictable order
+        
         System.Array.Sort(existing, (a, b) =>
             a.transform.position.x.CompareTo(b.transform.position.x));
 
         for (int i = 0; i < existing.Length; i++)
         {
             var area = existing[i];
-            area.cageId = i;                     // 0, 1, 2, ...
-            CageAreaAssignIds(area);             // stamp hamsters + interactables
+            area.cageId = i;
+            CageAreaAssignIds(area);
             if (CameraCageController.Instance != null)
                 CameraCageController.Instance.RegisterCage(area);
         }
-
-        // Now this reflects how many cages already exist.
+        
         cagesUnlocked = existing.Length;
     }
 
@@ -166,7 +183,7 @@ public class GameXPManager : MonoBehaviour
         var cageArea = cageGO.GetComponent<CageArea>();
         if (cageArea)
         {
-            cageArea.cageId = cagesUnlocked;   // will now be 1, 2, 3, ...
+            cageArea.cageId = cagesUnlocked;
             CageAreaAssignIds(cageArea);
 
             if (CameraCageController.Instance != null)
@@ -177,22 +194,17 @@ public class GameXPManager : MonoBehaviour
         cagesUnlocked++;
         OnCageUnlocked?.Invoke(cagesUnlocked);
     }
-
-
-
-
+    
     void NotifyXPChanged()
     {
         OnXPChanged?.Invoke(CurrentXP, XPToNextLevel);
     }
-    
     
     public static void CageAreaAssignIds(CageArea area)
     {
         if (!area) return;
 
         int id = area.cageId;
-        
         
         foreach (var interactable in area.GetComponentsInChildren<Interactable>(true))
             interactable.cageId = id;

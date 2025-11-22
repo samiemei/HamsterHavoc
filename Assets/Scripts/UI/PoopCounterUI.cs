@@ -13,7 +13,6 @@ public class PoopCounterUI : MonoBehaviour
         if (GameXPManager.Instance != null)
         {
             GameXPManager.Instance.OnPoopCollected += HandlePoopCollected;
-            // init
             HandlePoopCollected(
                 GameXPManager.Instance.totalPoopsCollected,
                 GameXPManager.Instance.totalBonusPoopsCollected

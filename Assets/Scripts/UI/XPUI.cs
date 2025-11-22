@@ -3,7 +3,6 @@ using UnityEngine.UI;
 
 public class XPUI : MonoBehaviour
 {
-    [Header("UI References")]
     public Text levelText;
     public Text xpText;
     public Image xpFill;
@@ -19,12 +18,10 @@ public class XPUI : MonoBehaviour
             Debug.LogWarning("[XPUI] No GameXPManager.Instance found in scene.");
             return;
         }
-
-        // Subscribe to events
+        
         xpManager.OnXPChanged += HandleXPChanged;
         xpManager.OnLevelChanged += HandleLevelChanged;
-
-        // Initialize UI with current values
+        
         HandleLevelChanged(xpManager.CurrentLevel);
         HandleXPChanged(xpManager.CurrentXP, xpManager.XPToNextLevel);
     }

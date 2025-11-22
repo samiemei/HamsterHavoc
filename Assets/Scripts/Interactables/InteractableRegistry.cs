@@ -19,7 +19,6 @@ public class InteractableRegistry : MonoBehaviour
 
     void Start()
     {
-        // One-time sweep for interactables already in the scene (cage 0, etc.)
         Interactable[] existing;
 
 #if UNITY_2023_1_OR_NEWER
@@ -72,7 +71,6 @@ public class InteractableRegistry : MonoBehaviour
                 best = i;
             }
         }
-
         return best;
     }
 }

@@ -15,7 +15,7 @@ public class HamsterPooper : MonoBehaviour
 
     [Header("Special Poop")]
     [Tooltip("Chance this spawn will be a bonus poop (0–1).")]
-    public float bonusPoopChance = 0.15f;   // 15% chance
+    public float bonusPoopChance = 0.15f;
 
     float nextTime;
     int activeCount;
@@ -59,8 +59,7 @@ public class HamsterPooper : MonoBehaviour
             Quaternion.identity
         );
         activeCount++;
-
-        // decide if this one is bonus
+        
         bool makeBonus =
             Random.value < bonusPoopChance ||
             Time.time <= eatBonusUntil;               // often bonus right after eating

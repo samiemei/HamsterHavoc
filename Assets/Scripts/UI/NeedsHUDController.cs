@@ -3,16 +3,15 @@ using UnityEngine;
 public class NeedsHUDController : MonoBehaviour
 {
     public static NeedsHUDController Instance { get; private set; }
-
-    [Header("Target Hamster")]
+    
     public HamsterNeeds target;
     public bool autoFindFirst = true;
-
-    [Header("Bars")]
+    
     public NeedBarUI hungerBar;
     public NeedBarUI thirstBar;
     public NeedBarUI energyBar;
     public NeedBarUI funBar;
+    public HamsterNeeds CurrentTarget => target;
 
     void Awake()
     {
@@ -39,7 +38,6 @@ public class NeedsHUDController : MonoBehaviour
         }
     }
 
-
     void Update()
     {
         if (!target) return;
@@ -50,6 +48,15 @@ public class NeedsHUDController : MonoBehaviour
         if (funBar)     funBar.SetValue01(Mathf.Clamp01(target.fun      / 100f));
     }
 
+    public HamsterAppearance CurrentTargetAppearance
+    {
+        get
+        {
+            if (!target) return null;
+            return target.GetComponent<HamsterAppearance>();
+        }
+    }
+    
     public void SetTarget(HamsterNeeds newTarget)
     {
         target = newTarget;

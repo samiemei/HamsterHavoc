@@ -1231,6 +1231,7 @@ GameObject:
   - component: {fileID: 4689864930395777303}
   - component: {fileID: 8138258486981651215}
   - component: {fileID: 4072405217358199558}
+  - component: {fileID: 3805168016413357129}
   m_Layer: 0
   m_Name: Hamster
   m_TagString: Untagged
@@ -1428,11 +1429,28 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HamsterPooper
   poopPrefab: {fileID: 4036567514151775664, guid: dcaeef0434ef3f84ba7cf8cc47a9a5b4, type: 3}
-  minInterval: 25
-  maxInterval: 55
+  minInterval: 10
+  maxInterval: 20
   maxActivePoopsPerHamster: 3
   eatBonusWindow: 20
   eatPoopChance: 0.6
+  bonusPoopChance: 0.15
+--- !u!114 &3805168016413357129
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7517258225322885536}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e280a5c7bd0862c408be7ccd0732fc5e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HamsterAppearance
+  spriteRenderer: {fileID: 3093934979728267009}
+  currentSkinId: default
+  isWalking: 0
+  lastMoveDir: {x: 0, y: -1}
 --- !u!1 &7708034590740996138
 GameObject:
   m_ObjectHideFlags: 0

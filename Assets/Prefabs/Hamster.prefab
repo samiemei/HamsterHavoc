@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: -3123374044230959575}
   - component: {fileID: 7296625712740711473}
   - component: {fileID: -5965542845826175944}
+  - component: {fileID: -9033338577312059988}
   m_Layer: 0
   m_Name: Hamster
   m_TagString: Untagged
@@ -174,12 +175,10 @@ MonoBehaviour:
   thirst: 70
   energy: 70
   fun: 50
-  comfort: 60
   hungerDecay: 10
   thirstDecay: 12
   energyDecay: 6
   funDecay: 8
-  comfortDecay: 4
 --- !u!114 &7296625712740711473
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -200,6 +199,7 @@ MonoBehaviour:
   desperateThreshold: 15
   satisfactionTarget: 80
   perNeedCooldown: 4
+  cageId: 0
 --- !u!114 &-5965542845826175944
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -218,3 +218,20 @@ MonoBehaviour:
   maxActivePoopsPerHamster: 3
   eatBonusWindow: 20
   eatPoopChance: 0.6
+  bonusPoopChance: 0.15
+--- !u!114 &-9033338577312059988
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9070423456406591134}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e280a5c7bd0862c408be7ccd0732fc5e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HamsterAppearance
+  spriteRenderer: {fileID: 4566062798335279167}
+  currentSkinId: default
+  isWalking: 0
+  lastMoveDir: {x: 0, y: -1}

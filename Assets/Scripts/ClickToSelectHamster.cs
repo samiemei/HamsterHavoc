@@ -3,7 +3,7 @@ using UnityEngine;
 public class ClickToSelectHamster : MonoBehaviour
 {
     public NeedsHUDController hud;
-    public LayerMask hamsterLayer; // assign a layer used by hamster colliders
+    public LayerMask hamsterLayer;
 
     void Update()
     {
