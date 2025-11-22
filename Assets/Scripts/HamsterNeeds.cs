@@ -7,14 +7,12 @@ public class HamsterNeeds : MonoBehaviour
     [Range(0,100)] public float thirst = 70f;
     [Range(0,100)] public float energy = 70f;
     [Range(0,100)] public float fun = 50f;
-    [Range(0,100)] public float comfort = 60f;
 
     [Header("Decay per minute")]
     public float hungerDecay = 10f;
     public float thirstDecay = 12f;
     public float energyDecay = 6f;
     public float funDecay = 8f;
-    public float comfortDecay = 4f;
 
     public float GetValue(NeedType type)
     {
@@ -24,7 +22,6 @@ public class HamsterNeeds : MonoBehaviour
             NeedType.Thirst => thirst,
             NeedType.Energy => energy,
             NeedType.Fun => fun,
-            NeedType.Comfort => comfort,
             _ => 0f
         };
     }
@@ -37,7 +34,6 @@ public class HamsterNeeds : MonoBehaviour
             case NeedType.Thirst:   thirst   = Mathf.Clamp(thirst + delta,   0f, 100f); break;
             case NeedType.Energy:   energy   = Mathf.Clamp(energy + delta,   0f, 100f); break;
             case NeedType.Fun:      fun      = Mathf.Clamp(fun + delta,      0f, 100f); break;
-            case NeedType.Comfort:  comfort  = Mathf.Clamp(comfort + delta,  0f, 100f); break;
         }
     }
 
@@ -52,7 +48,6 @@ public class HamsterNeeds : MonoBehaviour
         Check(NeedType.Thirst, thirst);
         Check(NeedType.Energy, energy);
         Check(NeedType.Fun, fun);
-        Check(NeedType.Comfort, comfort);
 
         return minNeed;
     }
@@ -66,6 +61,5 @@ public class HamsterNeeds : MonoBehaviour
         ModifyNeed(NeedType.Thirst,   -thirstDecay * m);
         ModifyNeed(NeedType.Energy,   -energyDecay * m);
         ModifyNeed(NeedType.Fun,      -funDecay * m);
-        ModifyNeed(NeedType.Comfort,  -comfortDecay * m);
     }
 }

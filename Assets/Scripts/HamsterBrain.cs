@@ -23,6 +23,8 @@ public class HamsterBrain : MonoBehaviour
     
     public float perNeedCooldown = 4f;
 
+    public int cageId = 0;
+
     private Rigidbody2D rb;
     private HamsterNeeds needs;
     private Interactable target;
@@ -104,13 +106,15 @@ public class HamsterBrain : MonoBehaviour
 
     void DecideNext()
     {
+        // 1) Figure out which need we care about right now
         NeedType lowest = needs.GetLowestNeed();
         float v = needs.GetValue(lowest);
-        
+
         bool isDesperate = v <= desperateThreshold;
         bool isTriggered = v <= triggerThreshold;
         bool cooledDown = Time.time >= (cooldownUntil.TryGetValue(lowest, out var until) ? until : 0f);
 
+        // 2) If nothing is urgent enough, just wander in this cage
         if (!(isDesperate || (isTriggered && cooledDown)))
         {
             destination = (Vector2)transform.position + Random.insideUnitCircle * 2.0f;
@@ -119,11 +123,20 @@ public class HamsterBrain : MonoBehaviour
             target = null;
             return;
         }
-        
-        var best = InteractableRegistry.Instance
-            ? InteractableRegistry.Instance.FindNearest((Vector2)transform.position, lowest, 50f)
-            : null;
 
+        // 3) Ask the registry for the best target IN THIS CAGE
+        Interactable best = null;
+        if (InteractableRegistry.Instance != null)
+        {
+            best = InteractableRegistry.Instance.FindNearest(
+                (Vector2)transform.position,
+                lowest,
+                50f,
+                cageId              // 🔑 only look at interactables in my cage
+            );
+        }
+
+        // 4) If we found something, go there. Otherwise, wander.
         if (best != null)
         {
             target = best;
@@ -136,12 +149,15 @@ public class HamsterBrain : MonoBehaviour
             destination = (Vector2)transform.position + Random.insideUnitCircle * 2.0f;
             state = State.Moving;
             currentNeed = NeedType.None;
+            target = null;
         }
-        
+
+        // 5) Debug logging
         if (target == null)
-            Debug.Log($"[Brain] No target for need {needs.GetLowestNeed()} (registry {(InteractableRegistry.Instance ? "OK" : "NULL")})");
+            Debug.Log($"[Brain] No target for need {lowest} in cage {cageId} " +
+                      $"(registry {(InteractableRegistry.Instance ? "OK" : "NULL")})");
         else
-            Debug.Log($"[Brain] Going to {target.name} for {target.PrimaryNeed}");
+            Debug.Log($"[Brain] Going to {target.name} for {target.PrimaryNeed} in cage {cageId}");
     }
 
     void MoveTowardDestination()
@@ -159,6 +175,7 @@ public class HamsterBrain : MonoBehaviour
                 interactTimer = interactionTime;
                 target.OnStartUse(gameObject);
                 state = State.Interacting;
+                GameXPManager.Instance.AddXP(0);
             }
             else
             {
@@ -167,7 +184,7 @@ public class HamsterBrain : MonoBehaviour
             return;
         }
 
-        // movement smoothing
+        // movement
         float slowRadius = arrivalRadius * 3f;
         float speed = dist < slowRadius ? Mathf.Lerp(0f, moveSpeed, dist / slowRadius) : moveSpeed;
         Vector2 next = Vector2.MoveTowards(pos, destination, speed * Time.deltaTime);

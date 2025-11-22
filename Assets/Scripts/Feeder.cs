@@ -15,6 +15,8 @@ public class Feeder : Interactable
     {
         if (user.TryGetComponent<HamsterNeeds>(out var needs))
             needs.ModifyNeed(NeedType.Hunger, +hungerGainPerSecond * dt);
+        if (user.TryGetComponent<HamsterPooper>(out var pooper))
+            pooper.NotifyAteFood();
     }
     public override void OnCompleteUse(GameObject user) { }
 }

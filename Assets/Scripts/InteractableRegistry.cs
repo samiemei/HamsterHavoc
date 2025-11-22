@@ -9,31 +9,70 @@ public class InteractableRegistry : MonoBehaviour
 
     void Awake()
     {
-        if (Instance && Instance != this) { Destroy(gameObject); return; }
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
         Instance = this;
     }
 
-    public void Register(Interactable i) { if (i && !all.Contains(i)) all.Add(i); }
-    public void Unregister(Interactable i) { if (i) all.Remove(i); }
-
     void Start()
     {
-        // optional sweep so you don't need a separate AutoRegister component
-        var all = FindObjectsByType<Interactable>(FindObjectsSortMode.None);
-        foreach (var i in all) Register(i);
+        // One-time sweep for interactables already in the scene (cage 0, etc.)
+        Interactable[] existing;
+
+#if UNITY_2023_1_OR_NEWER
+        existing = Object.FindObjectsByType<Interactable>(
+            FindObjectsInactive.Exclude,
+            FindObjectsSortMode.None
+        );
+#else
+#pragma warning disable 618
+        existing = Object.FindObjectsOfType<Interactable>();
+#pragma warning restore 618
+#endif
+
+        foreach (var i in existing)
+        {
+            Register(i);
+        }
+
+        Debug.Log($"[Registry] Initialized with {all.Count} interactables.");
     }
 
-    public Interactable FindNearest(Vector2 from, NeedType need, float maxRange)
+    public void Register(Interactable i)
+    {
+        if (!i) return;
+        if (!all.Contains(i))
+            all.Add(i);
+    }
+
+    public void Unregister(Interactable i)
+    {
+        if (!i) return;
+        all.Remove(i);
+    }
+
+    public Interactable FindNearest(Vector2 from, NeedType need, float maxRange, int cageId)
     {
         Interactable best = null;
-        float bestDist = Mathf.Infinity;
+        float bestDist = maxRange;
 
         foreach (var i in all)
         {
-            if (!i || i.PrimaryNeed != need) continue;
+            if (!i) continue;
+            if (i.PrimaryNeed != need) continue;
+            if (i.cageId != cageId) continue;
+
             float d = Vector2.Distance(from, i.GetUsePosition());
-            if (d < bestDist && d <= maxRange) { bestDist = d; best = i; }
+            if (d < bestDist)
+            {
+                bestDist = d;
+                best = i;
+            }
         }
+
         return best;
     }
 }

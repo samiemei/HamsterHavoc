@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 4879754328730487173}
   - component: {fileID: -3123374044230959575}
   - component: {fileID: 7296625712740711473}
+  - component: {fileID: -5965542845826175944}
   m_Layer: 0
   m_Name: Hamster
   m_TagString: Untagged
@@ -83,8 +84,8 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 1}
+  m_Sprite: {fileID: 21300000, guid: 6f2e764a0d8360d4286d7d72b276ec2b, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -195,3 +196,25 @@ MonoBehaviour:
   decisionInterval: 1
   interactionTime: 2
   arrivalRadius: 0.12
+  triggerThreshold: 35
+  desperateThreshold: 15
+  satisfactionTarget: 80
+  perNeedCooldown: 4
+--- !u!114 &-5965542845826175944
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9070423456406591134}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc382c6d91539a646bfb074039b91a2d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HamsterPooper
+  poopPrefab: {fileID: 0}
+  minInterval: 25
+  maxInterval: 55
+  maxActivePoopsPerHamster: 3
+  eatBonusWindow: 20
+  eatPoopChance: 0.6
